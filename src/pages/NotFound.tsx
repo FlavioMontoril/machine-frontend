@@ -1,5 +1,7 @@
 export const NotFound: React.FC = () => {
-    return(
-        <></>
+    return (
+        <div>
+            Hello PageNotFound
+        </div>
     )
 }
