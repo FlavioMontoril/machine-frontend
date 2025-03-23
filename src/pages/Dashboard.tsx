@@ -1,5 +1,7 @@
 export const Dashboard: React.FC = () => {
-    return(
-        <></>
+    return (
+        <div>
+            Hello Dashboard
+        </div>
     )
 }
