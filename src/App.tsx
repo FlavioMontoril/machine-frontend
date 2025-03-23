@@ -1,13 +1,13 @@
 
-import './App.css'
+import {BrowserRouter as Router} from"react-router-dom"
+import { AppRoutes } from "./routes"
 
-export const App = () => {
+export function App() {
 
   return (
-    <>
-    <h2>Hello</h2>
-     
-    </>
+    <Router>
+      <AppRoutes/>
+    </Router>
   )
 }
 
