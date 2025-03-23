@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import { AppLayout } from "./layout/app-layout";
 import { Dashboard } from "./pages/Dashboard";
 import { NotFound } from "./pages/NotFound";
-import { CreateMachine } from "./pages/MachineList";
+import { CreateMachine } from "./pages/MachineCreate";
 import { Documents } from "./pages/Documents";
 
 export function AppRoutes() {

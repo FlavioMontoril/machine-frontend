@@ -1,7 +1,7 @@
 export const CreateMachine: React.FC = () => {
     return (
         <div>
-            Hello MachineCreate
+            <h1>Hello MachineCreate</h1>
         </div>
     )
 }
