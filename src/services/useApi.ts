@@ -1,63 +1,82 @@
+import { v4 as uuidv4 } from "uuid";
 import { initialItensMachine } from "../mocks/ArrayMachine";
 import { MachineProps } from "../model/MachineModel";
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Simulando um "banco de dados" em memória
-let machinesDB: MachineProps[] = [...initialItensMachine];
-
-// Função para gerar um novo ID baseado no maior ID existente
-const generateId = (): number => {
-    const existingIds = new Set(machinesDB.map(m => m.id));
-    let newId = Math.max(0, ...existingIds) + 1;
-
-    while (existingIds.has(newId)) {
-        newId++; // Garante que o novo ID nunca esteja em uso
-    }
-
-    return newId;
+// Salvar e carregar os dados no localStorage para persistência
+const saveToStorage = () => {
+    localStorage.setItem("machinesDB", JSON.stringify(machinesDB));
 };
 
+const loadFromStorage = (): MachineProps[] => {
+    const storedData = localStorage.getItem("machinesDB");
+    return storedData ? JSON.parse(storedData) : [...initialItensMachine];
+};
 
+// Carrega os dados do localStorage ao iniciar
+let machinesDB: MachineProps[] = loadFromStorage();
 
 export const mockApi = {
-    machine: {
-        getAll: async () => {
-            await delay(1000);
-            return { success: true, data: [...machinesDB] }; // Retorna uma cópia para evitar mutação externa
-        },
 
-        getById: async (id: number) => {
+    machine: {
+        // Função getAll modificada para usar limit e offset
+        getAll: async (limit: number = 10, offset: number = 0) => {
+            await delay(1000);
+
+            // Retorna uma cópia dos itens para evitar mutação
+            const paginatedData = machinesDB.slice(offset, offset + limit);
+
+            return {
+                success: true,
+                data: paginatedData,
+                limit, // Limite de itens
+                offset, // Deslocamento
+                total: machinesDB.length // Total de itens
+            };
+        },
+        // machine: {
+        //     getAll: async () => {
+        //         await delay(1000);
+        //         return { success: true, data: [...machinesDB] }; // Retorna uma cópia para evitar mutação externa
+        //     },
+
+        getById: async (id: string) => {
             await delay(500);
             const machine = machinesDB.find((m) => m.id === id);
-            return machine ? { success: true, data: machine } : { success: false, error: "Máquina não encontrada" };
+            if (!machine) return { success: false, status: 404, error: "Máquina não encontrada" };
+
+            return { success: true, data: machine };
         },
 
         create: async (data: Omit<MachineProps, "id">) => {
             await delay(500);
             const newMachine: MachineProps = {
-                id: generateId(), // Gera ID automático
+                id: uuidv4(), // Agora usando UUID
                 ...data,
             };
-            machinesDB.push(newMachine);
+            machinesDB = [...machinesDB, newMachine]; // Cria uma nova referência para evitar mutação
+            saveToStorage(); // Atualiza o localStorage
             return { success: true, data: newMachine };
         },
 
-        update: async (id: number, data: Partial<MachineProps>) => {
+        update: async (id: string, data: Partial<MachineProps>) => {
             await delay(500);
             const index = machinesDB.findIndex((m) => m.id === id);
-            if (index === -1) return { success: false, error: "Máquina não encontrada" };
+            if (index === -1) return { success: false, status: 404, error: "Máquina não encontrada" };
 
-            machinesDB[index] = { ...machinesDB[index], ...data };
+            machinesDB = machinesDB.map((m) => (m.id === id ? { ...m, ...data } : m));
+            saveToStorage();
             return { success: true, data: machinesDB[index] };
         },
 
-        delete: async (id: number) => {
+        delete: async (id: string) => {
             await delay(500);
             const index = machinesDB.findIndex((m) => m.id === id);
-            if (index === -1) return { success: false, error: "Máquina não encontrada" };
+            if (index === -1) return { success: false, status: 404, error: "Máquina não encontrada" };
 
-            machinesDB = machinesDB.filter((m) => m.id !== id); // Remove sem mutar o array original
+            machinesDB = machinesDB.filter((m) => m.id !== id);
+            saveToStorage();
             return { success: true };
         },
     },

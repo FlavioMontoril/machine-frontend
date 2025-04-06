@@ -1,13 +1,11 @@
-import { MachineList1 } from "../components/MachineList"
+import { MachineList } from "../components/MachineList"
 
 export const Dashboard: React.FC = () => {
     return (
-        <div>
+        <div className="gap-5 pl-52">
             Hello Dashboard
 
-            <div>
-                <MachineList1 />
-            </div>
+            <MachineList />
         </div>
     )
 }

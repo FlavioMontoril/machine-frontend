@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import { Sidebar } from "./sidebar/Sidebar";
 import { Header } from "./header";
+import { Toaster } from "sonner";
 
 export const AppLayout: React.FC = () => {
     return (
@@ -10,10 +11,13 @@ export const AppLayout: React.FC = () => {
             <div className="flex-1 flex flex-col">
                 <Header />
                 <main className="flex-1 overflow-hidden">
-                    <div className="mx-auto pl-64 py-16">
+                    <div className="mx-auto pl-10 py-10">
                         <Outlet />
                     </div>
                 </main>
+                <div>
+                    <Toaster richColors position="top-center" />
+                </div>
             </div>
         </div>
     )

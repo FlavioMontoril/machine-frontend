@@ -3,9 +3,12 @@ import { machineSchema, MachineSchema } from "../validations/MachineSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMachineStore } from "../store/MachineStore";
 import { mockApi } from "../services/useApi";
+import { useNavigate } from "react-router-dom";
 
 export const CreateMachine: React.FC = () => {
     const { add } = useMachineStore();
+    const navigate = useNavigate();
+
 
     const { register, handleSubmit, formState: { errors } } = useForm<MachineSchema>({
         resolver: zodResolver(machineSchema),
@@ -24,6 +27,7 @@ export const CreateMachine: React.FC = () => {
                 console.log("Disparou", data)
                 add(response.data); // Adiciona à store
                 alert("Máquina cadastrada com sucesso!");
+                navigate("/")
             } else {
                 alert("Erro ao cadastrar máquina.");
             }

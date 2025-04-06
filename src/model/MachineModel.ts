@@ -1,10 +1,16 @@
+export interface FileProps {
+    name: string;
+    createdAt: string;
+}
+
 export interface ManualProps {
     id: string;
     machineId: number;
     description: string;
     version: string;
     language: string;
-    file: string;
+    file: FileProps;
+    createdAt: string; // Adicionado createdAt
 }
 
 export interface CatalogProps {
@@ -13,18 +19,22 @@ export interface CatalogProps {
     description: string;
     version: string;
     language: string;
-    file: string;
+    file: FileProps;
+    createdAt: string; // Adicionado createdAt
 }
 
 export interface VersionProps {
     version: number;
     manuals: ManualProps[];
     catalogs: CatalogProps[];
+    createdAt: string; // Adicionado createdAt
+    id: string;
 }
 
 export interface MachineProps {
-    id: number;
+    id: string;
     code: string;
     description: string;
-    versions?: VersionProps[]; // Agora é opcional
+    createdAt?: string; // Adicionado createdAt
+    versions?: VersionProps[];
 }

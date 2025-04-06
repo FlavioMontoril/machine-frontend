@@ -64,7 +64,14 @@
 // ];
 
 
+import { v4 as uuidv4 } from "uuid";
 import { MachineProps } from "../model/MachineModel";
+
+const getRandomDate = (): string => {
+    const start = new Date(2020, 0, 1);
+    const end = new Date();
+    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString();
+};
 
 const generateMockData = (): MachineProps[] => {
     const machines: MachineProps[] = [];
@@ -72,28 +79,39 @@ const generateMockData = (): MachineProps[] => {
     for (let i = 1; i <= 50; i++) {
         const versions = Array.from({ length: Math.floor(Math.random() * 3) + 2 }, (_, vIndex) => ({
             version: vIndex + 1,
+            createdAt: getRandomDate(),
+            id: uuidv4(),
             manuals: Array.from({ length: Math.floor(Math.random() * 3) + 1 }, (_, mIndex) => ({
-                id: `${i}0${mIndex + 1}`,
+                id: uuidv4(),
                 machineId: i,
                 description: `Manual de Operação V${vIndex + 1}.${mIndex + 1}`,
                 version: `${vIndex + 1}.${mIndex + 1}`,
                 language: "PT-BR",
-                file: `manual_operacao_v${vIndex + 1}_${mIndex + 1}.pdf`,
+                file: {  // Agora file é um objeto
+                    name: `manual_operacao_v${vIndex + 1}_${mIndex + 1}.pdf`,
+                    createdAt: getRandomDate(),
+                },
+                createdAt: getRandomDate(),
             })),
             catalogs: Array.from({ length: Math.floor(Math.random() * 3) + 1 }, (_, cIndex) => ({
-                id: `${i}1${cIndex + 1}`,
+                id: uuidv4(),
                 machineId: i,
                 description: `Catálogo de Peças V${vIndex + 1}.${cIndex + 1}`,
                 version: `${vIndex + 1}.${cIndex + 1}`,
                 language: "PT-BR",
-                file: `catalogo_pecas_v${vIndex + 1}_${cIndex + 1}.pdf`,
+                file: {  // Agora file é um objeto
+                    name: `catalogo_pecas_v${vIndex + 1}_${cIndex + 1}.pdf`,
+                    createdAt: getRandomDate(),
+                },
+                createdAt: getRandomDate(),
             })),
         }));
 
         machines.push({
-            id: i,
+            id: uuidv4(),
             code: `MACH-${String(i).padStart(3, '0')}`,
             description: `Máquina ${i}`,
+            createdAt: getRandomDate(),
             versions,
         });
     }
@@ -102,3 +120,4 @@ const generateMockData = (): MachineProps[] => {
 };
 
 export const initialItensMachine: MachineProps[] = generateMockData();
+
