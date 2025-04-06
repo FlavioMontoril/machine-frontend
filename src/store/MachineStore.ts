@@ -7,9 +7,9 @@ import { create } from "zustand";
 interface MachineStoreProps {
     list: MachineProps[];
     add: (data: Omit<MachineProps, "id">) => Promise<void>;
-    delete: (id: number) => void;
-    findOne: (id: number) => MachineProps | null;
-    update: (id: number, data: Partial<MachineProps>) => void;
+    delete: (id: string) => void;
+    findOne: (id: string) => MachineProps | null;
+    update: (id: string, data: Partial<MachineProps>) => void;
     setAll: (total: number, machines: MachineProps[] | null) => void;
     total: number;
 }
@@ -33,7 +33,7 @@ export const useMachineStore = create<MachineStoreProps>((set, get) => {
 
 
 
-    const handleDelete = (id: number) => {
+    const handleDelete = (id: string) => {
         mockApi.machine.delete(id).then((response) => {
             if (response.success) {
                 set((state) => ({
@@ -43,11 +43,11 @@ export const useMachineStore = create<MachineStoreProps>((set, get) => {
         });
     };
 
-    const handleFindOne = (id: number) => {
+    const handleFindOne = (id: string) => {
         return get().list.find(machine => machine.id === id) || null;
     };
 
-    const handleUpdate = (id: number, data: Partial<MachineProps>) => {
+    const handleUpdate = (id: string, data: Partial<MachineProps>) => {
         mockApi.machine.update(id, data).then((response) => {
             if (response.success) {
                 set((state) => ({
@@ -60,13 +60,20 @@ export const useMachineStore = create<MachineStoreProps>((set, get) => {
     };
 
     const handleSetAll = (total: number, machines: MachineProps[] | null) => {
-        set(() => ({
-            list: machines ? machines.filter((m, index, self) =>
-                index === self.findIndex(t => t.id === m.id)
-            ) : [],
-            total,
-        }));
+        set((state) => {
+            // Mantém as máquinas existentes e atualiza apenas as que vêm da API
+            const updatedList = machines ? [
+                ...state.list.filter(existing => !machines.some(m => m.id === existing.id)),
+                ...machines
+            ] : state.list;
+
+            return {
+                list: updatedList,
+                total
+            };
+        });
     };
+
 
 
     return {
