@@ -1,88 +1,46 @@
-import { MachineProps } from "../model/MachineModel";
-import { mockApi } from "../services/useApi";
 import { create } from "zustand";
-
-
+import { TaskModel, TaskProps } from "../model/MachineModel";
 
 interface MachineStoreProps {
-    list: MachineProps[];
-    add: (data: Omit<MachineProps, "id">) => Promise<void>;
-    delete: (id: string) => void;
-    findOne: (id: string) => MachineProps | null;
-    update: (id: string, data: Partial<MachineProps>) => void;
-    setAll: (total: number, machines: MachineProps[] | null) => void;
-    total: number;
+    list: TaskModel[];
+    add: (data: TaskProps) => Promise<void>;
+    setAll: (data: TaskProps[] | null) => void
+    deleteTask: (id: string) => Promise<void>;
+    findOne: (id: string) => TaskModel | null;
+
 }
 
 export const useMachineStore = create<MachineStoreProps>((set, get) => {
 
-    const handleAdd = async (data: Omit<MachineProps, "id">) => {
-        const response = await mockApi.machine.create(data);
-
-        if (response.success) {
-            set((state) => {
-                if (state.list.some(machine => machine.id === response.data.id)) {
-                    console.error("⚠️ ERRO: Tentativa de adicionar ID duplicado:", response.data.id);
-                    return state; // Retorna o estado atual sem modificar nada
-                }
-                return { list: [...state.list, response.data] };
-            });
-        }
+    const handleAdd = async (data: TaskProps) => {
+        const newMachine = TaskModel.build(data);
+        set((state) => ({
+            list: [...state.list, newMachine],
+        }));
     };
+    const handleSetAll = (tasks: TaskProps[] | null) => {
+        const tasksAll = tasks ? tasks.map((task) => TaskModel.build(task)) : [];
 
-
-
-
-    const handleDelete = (id: string) => {
-        mockApi.machine.delete(id).then((response) => {
-            if (response.success) {
-                set((state) => ({
-                    list: state.list.filter((machine) => machine.id !== id),
-                }));
-            }
-        });
+        set((state) => {
+            const newState = { ...state, list: tasksAll }
+            return newState;
+        })
+    };
+    const handleDeleteTask = async (id: string) => {
+        set((state) => ({
+            list: state.list.filter((task) => task.getId() !== id)
+        }));
     };
 
     const handleFindOne = (id: string) => {
-        return get().list.find(machine => machine.id === id) || null;
+        return get().list.find((task) => task.getId() === id) || null
     };
-
-    const handleUpdate = (id: string, data: Partial<MachineProps>) => {
-        mockApi.machine.update(id, data).then((response) => {
-            if (response.success) {
-                set((state) => ({
-                    list: state.list.map((machine) =>
-                        machine.id === id ? { ...machine, ...response.data } : machine
-                    ),
-                }));
-            }
-        });
-    };
-
-    const handleSetAll = (total: number, machines: MachineProps[] | null) => {
-        set((state) => {
-            // Mantém as máquinas existentes e atualiza apenas as que vêm da API
-            const updatedList = machines ? [
-                ...state.list.filter(existing => !machines.some(m => m.id === existing.id)),
-                ...machines
-            ] : state.list;
-
-            return {
-                list: updatedList,
-                total
-            };
-        });
-    };
-
-
 
     return {
         list: [],
         add: handleAdd,
-        delete: handleDelete,
-        findOne: handleFindOne,
-        update: handleUpdate,
         setAll: handleSetAll,
-        total: 0,
+        deleteTask: handleDeleteTask,
+        findOne: handleFindOne,
     };
 });
