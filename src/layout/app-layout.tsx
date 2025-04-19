@@ -11,7 +11,7 @@ export const AppLayout: React.FC = () => {
             <div className="flex-1 flex flex-col">
                 <Header />
                 <main className="flex-1 overflow-hidden">
-                    <div className="mx-auto pl-10 py-10">
+                    <div className="mx-auto py-10">
                         <Outlet />
                     </div>
                 </main>

@@ -1,60 +1,127 @@
-import { useForm } from "react-hook-form"
-import { machineSchema, MachineSchema } from "../validations/MachineSchema";
+import React from "react";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMachineStore } from "../store/MachineStore";
-import { mockApi } from "../services/useApi";
 import { useNavigate } from "react-router-dom";
 
-export const CreateMachine: React.FC = () => {
-    const { add } = useMachineStore();
+
+import { useApi } from "../services/useApi";
+import { taskSchema, TaskSchema } from "../validations/MachineSchema";
+import { TypeProps } from "../model/MachineModel";
+import { useMachineStore } from "../store/MachineStore";
+import { toast } from "sonner";
+
+export const CreateTask: React.FC = () => {
     const navigate = useNavigate();
+    const api = useApi();
+    const { add } = useMachineStore();
 
-
-    const { register, handleSubmit, formState: { errors } } = useForm<MachineSchema>({
-        resolver: zodResolver(machineSchema),
+    const { register, handleSubmit, reset, formState: { errors } } = useForm<TaskSchema>({
+        resolver: zodResolver(taskSchema),
         defaultValues: {
-            code: "",
+            summary: "",
             description: "",
-            version: "",
+            reporter: "",
+            type: TypeProps.TASK,
+            assignee: "",
         },
-    })
+    });
 
-    async function onSubmit(data: MachineSchema) {
+    const onSubmit = async (data: TaskSchema) => {
         try {
-            const response = await mockApi.machine.create(data); // Chama a API mock
-            console.log("Resposta da API:", response); // Verifica a resposta da API
-            if (response.success) {
-                console.log("Disparou", data)
-                add(response.data); // Adiciona à store
-                alert("Máquina cadastrada com sucesso!");
-                navigate("/")
+            const { status, data: createdData } = await api.task.createTask(data);
+            if (status === 201 && createdData) {
+                add(createdData);
+                toast.success("Tarefa criada")
+                reset();
+                navigate("/");
             } else {
-                alert("Erro ao cadastrar máquina.");
+                toast.error("Erro ao cadastrar máquina");
+
             }
-        } catch (error) {
-            console.error("Erro ao cadastrar máquina:", error);
-            alert("Erro ao cadastrar máquina.");
-        }
-    }
+        } catch (error: any) {
+            console.error("Erro ao criar tarefa:", error.message);
+            alert("Não foi possível criar a tarefa.");
+        };
+    };
+
     return (
-        <div>
-            <h1>Cadastrar nova máquina</h1>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <label>Código</label>
-                <input type="text" placeholder="Código da máquina" {...register("code")} />
-                {errors.code && <p>{errors.code.message}</p>}
+        <div className="max-w-lg mx-auto p-4">
+            <h1 className="text-2xl mb-4">Criar Nova Tarefa</h1>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                {/* SUMMARY */}
+                <div>
+                    <label className="block mb-1">Resumo</label>
+                    <input
+                        {...register("summary")}
+                        placeholder="Resumo da tarefa"
+                        className="w-full border px-2 py-1"
+                    />
+                    {errors.summary && (
+                        <p className="text-red-600">{errors.summary.message}</p>
+                    )}
+                </div>
 
-                <label>Descrição</label>
-                <input type="text" placeholder="Descrição" {...register("description")} />
-                {errors.description && <p>{errors.description.message}</p>}
+                {/* DESCRIPTION */}
+                <div>
+                    <label className="block mb-1">Descrição</label>
+                    <textarea
+                        {...register("description")}
+                        placeholder="Descrição detalhada"
+                        className="w-full border px-2 py-1 h-24"
+                    />
+                    {errors.description && (
+                        <p className="text-red-600">{errors.description.message}</p>
+                    )}
+                </div>
 
-                <label>Versão</label>
-                <input type="text" placeholder="Versão" {...register("version")} />
-                {errors.version && <p>{errors.version.message}</p>}
+                {/* REPORTER */}
+                <div>
+                    <label className="block mb-1">Repórter</label>
+                    <input
+                        {...register("reporter")}
+                        placeholder="Quem reportou"
+                        className="w-full border px-2 py-1"
+                    />
+                    {errors.reporter && (
+                        <p className="text-red-600">{errors.reporter.message}</p>
+                    )}
+                </div>
 
-                <button type="submit">Cadastrar</button>
+                {/* TYPE */}
+                <div>
+                    <label className="block mb-1">Tipo</label>
+                    <select {...register("type")} className="w-full border px-2 py-1">
+                        {Object.values(TypeProps).map((tp) => (
+                            <option key={tp} value={tp}>
+                                {tp.replace("_", " ")}
+                            </option>
+                        ))}
+                    </select>
+                    {errors.type && (
+                        <p className="text-red-600">{errors.type.message}</p>
+                    )}
+                </div>
+
+                {/* ASSIGNEE */}
+                <div>
+                    <label className="block mb-1">Responsável</label>
+                    <input
+                        {...register("assignee")}
+                        placeholder="Quem vai executar (opcional)"
+                        className="w-full border px-2 py-1"
+                    />
+                    {errors.assignee && (
+                        <p className="text-red-600">{errors.assignee.message}</p>
+                    )}
+                </div>
+
+                {/* SUBMIT */}
+                <button
+                    type="submit"
+                    className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+                >Cadastrar
+                </button>
             </form>
         </div>
     );
 };
-
