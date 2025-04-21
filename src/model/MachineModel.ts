@@ -140,7 +140,7 @@ export interface TaskProps {
     type: TypeProps;
     status: TaskStatus;
     assignee?: string;
-    createdAt?: string;
+    createdAt?: Date;
 }
 
 export class TaskModel {
@@ -151,7 +151,7 @@ export class TaskModel {
     private type: TypeProps;
     private status: TaskStatus;
     private assignee?: string;
-    private createdAt: string;
+    private createdAt: Date;
 
     constructor(data: TaskProps) {
         this.id = data.id;
@@ -161,7 +161,9 @@ export class TaskModel {
         this.type = data.type;
         this.status = data.status;
         this.assignee = data.assignee || "";
-        this.createdAt = data.createdAt || "";
+        this.createdAt = data.createdAt
+            ? new Date(data.createdAt)  // converter string → Date
+            : new Date();
     }
 
     static build(data: TaskProps): TaskModel {
@@ -189,7 +191,7 @@ export class TaskModel {
     getAssignee(): string | undefined {
         return this.assignee;
     }
-    getCreatedAt(): string | undefined {
+    getCreatedAt(): Date {
         return this.createdAt;
     }
 
