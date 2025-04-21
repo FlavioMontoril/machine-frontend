@@ -1,4 +1,4 @@
-import { MachineList } from "../components/MachineList"
+import { MachineList } from "../commom/MachineList"
 
 export const Dashboard: React.FC = () => {
     return (

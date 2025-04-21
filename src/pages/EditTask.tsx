@@ -1,50 +1,49 @@
-import React from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
-import { useApi } from "../services/useApi";
+import { useForm } from "react-hook-form";
 import { taskSchema, TaskSchema } from "../validations/MachineSchema";
 import { TypeProps } from "../model/MachineModel";
 import { toast } from "sonner";
+import { useApi } from "../services/useApi";
 import { useTaskStore } from "../store/TaskStore";
+import { useParams } from "react-router-dom";
 
-export const CreateTask: React.FC = () => {
-    const navigate = useNavigate();
-    const api = useApi();
-    const { addTask } = useTaskStore();
 
-    const { register, handleSubmit, reset, formState: { errors } } = useForm<TaskSchema>({
+export const EditTask: React.FC = () => {
+
+    const { task } = useApi();
+    const { updateTask: updateTaskStore } = useTaskStore();
+    const params = useParams();
+
+    console.log("Parms", params);
+
+    const { register, handleSubmit, formState: { errors } } = useForm<TaskSchema>({
         resolver: zodResolver(taskSchema),
         defaultValues: {
             summary: "",
             description: "",
             reporter: "",
-            type: TypeProps.TASK,
             assignee: "",
-        },
+        }
     });
 
-    const onSubmit = async (data: TaskSchema) => {
-        try {
-            const { status, data: createdData } = await api.task.createTask(data);
-            if (status === 201 && createdData) {
-                addTask(createdData);
-                toast.success("Tarefa criada")
-                reset();
-                navigate("/");
-            } else {
-                toast.error("Erro ao cadastrar máquina");
+    async function onSubmit(data: TaskSchema) {
+        if (!params.id) return toast.error("ID da tarefa não encontrado");
 
+        try {
+            const { status, data: updated } = await task.updateTask(params.id, data);
+
+            if (status === 200 && updated) {
+                updateTaskStore(updated.id, updated);
             }
+
         } catch (error: any) {
-            console.error("Erro ao criar tarefa:", error.message);
-            alert("Não foi possível criar a tarefa.");
-        };
+            toast.error(`Erro ao editar tasks:${error.message}`);
+        }
     };
 
     return (
         <div className="max-w-lg mx-auto p-4">
-            <h1 className="text-2xl mb-4">Criar Nova Tarefa</h1>
+            <h1 className="text-2xl mb-4">Editar Tarefa</h1>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 {/* SUMMARY */}
                 <div>
@@ -113,12 +112,13 @@ export const CreateTask: React.FC = () => {
                     )}
                 </div>
 
-                {/* SUBMIT */}
-                <button
-                    type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
-                >Cadastrar
-                </button>
+                <div>
+                    <button
+                        type="submit"
+                        className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+                    >Cadastrar
+                    </button>
+                </div>
             </form>
         </div>
     );

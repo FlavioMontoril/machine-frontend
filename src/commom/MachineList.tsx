@@ -1,26 +1,27 @@
-import { useMachineStore } from "../store/MachineStore"
 import { useApi } from "../services/useApi"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
-import { useEffect, useState } from "react";
-import { Card, CardTitle } from "./ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../components/ui/accordion";
+import { useEffect, useMemo, useState } from "react";
+import { Card, CardTitle } from "../components/ui/card";
 import { Search, Settings } from "lucide-react";
-import { Input } from "./ui/input";
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "./ui/pagination";
-import { ScrollArea } from "./ui/scroll-area";
-import { toast } from "sonner";
-import { Button } from "./ui/button";
+import { Input } from "../components/ui/input";
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../components/ui/pagination";
+import { ScrollArea } from "../components/ui/scroll-area";
 import dayjs from "dayjs";
+import { useTaskStore } from "../store/TaskStore";
+import { TaskAction } from "./TaskAction";
 
 export const MachineList: React.FC = () => {
 
     const api = useApi();
-    const { setAll, list, deleteTask } = useMachineStore();
+    const { setAllTasks, list } = useTaskStore();
+
+    console.log("LIST", list);
 
     const [currentPage, setCurrentPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [searchMachine, setSearchMachine] = useState("");
 
-    let limit: number = 2;
+    let limit: number = 10;
     const offset = (currentPage - 1) * limit;
     const pagesCount = Math.ceil(totalItems / limit);
     const firstMachineIndex = (currentPage - 1) * limit + 1;
@@ -28,16 +29,16 @@ export const MachineList: React.FC = () => {
 
     useEffect(() => {
         fetchMachine()
-    }, [searchMachine])
 
+    }, [currentPage])
+
+    console.log("LIST USEEFFECT", list);
     async function fetchMachine() {
 
         try {
-            console.log("DATA");
             const { status, data } = await api.task.getAllTasks({ limit, offset })
             if (status === 200 && data)
-                console.log("fetchMachine → status:", status, "data:", data);
-            setAll(data)
+                setAllTasks(data)
             setTotalItems(data.length);
 
         } catch (error: any) {
@@ -46,19 +47,12 @@ export const MachineList: React.FC = () => {
         }
     }
 
-    async function handleDeleteTask(id: string) {
-        console.log("Disparou delete");
-        try {
-            const { status } = await api.task.deleteTask(`/v1/tasks/${id}`);
-            if (status === 200 || status === 204) {
-                deleteTask(id)
-                toast.success(`Máquina: ${id})} - deletada com sucesso`)
+    const sortedTasks = useMemo(() => {
+        return [...list].sort(
+            (a, b) => b.getCreatedAt().getTime() - a.getCreatedAt().getTime()
+        );
+    }, [list]);
 
-            }
-        } catch (error: any) {
-            toast.error(`Não foi possivel deletar task:${id}`)
-        }
-    }
     return (
 
         <div className="space-y-7">
@@ -76,8 +70,8 @@ export const MachineList: React.FC = () => {
 
             <ScrollArea className="w-full h-[690px] rounded-md pr-4">
                 <Accordion type="single" collapsible className="w-full m-5 pr-16">
-                    {list.length > 0 ? (
-                        list.map((user) => {
+                    {sortedTasks.length > 0 ? (
+                        sortedTasks.map((user) => {
                             return (
                                 <Card key={user.getId()} className="p-3 items-center">
                                     <AccordionItem value={`machine${user.getId()}`} className="border-none">
@@ -87,7 +81,8 @@ export const MachineList: React.FC = () => {
                                                 <Settings />
                                                 {user.getDescription()} -
                                             </CardTitle>
-                                            <p>{dayjs(user.getCreatedAt()).format("DD-MM-YY")}</p>
+                                            <p>{dayjs(user.getCreatedAt()).format("DD-MM-YYYY")}</p>
+                                            <TaskAction actionId={user.getId()} />
                                         </div>
                                         <div className="flex justify-end">
                                             <AccordionTrigger className="flex justify-end" />
@@ -98,14 +93,8 @@ export const MachineList: React.FC = () => {
                                         </AccordionContent>
 
                                     </AccordionItem>
-                                    <Button
-                                        onClick={() => handleDeleteTask(user.getId())}
-                                    >
-                                        Deletar
-                                    </Button>
                                 </Card>
                             )
-
                         })
                     ) : (
                         <span>Sem máquinas para exibir</span>
@@ -153,10 +142,6 @@ export const MachineList: React.FC = () => {
                     </PaginationContent>
                 </Pagination>
             </div>
-
-            {/* <Button onClick={() => mockApi.machine.reset()}>
-                Resetar Máquinas
-            </Button> */}
         </div>
 
     )

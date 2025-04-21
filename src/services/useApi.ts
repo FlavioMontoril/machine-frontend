@@ -14,10 +14,12 @@ interface PaginationTaskProps {
 }
 
 type createTaskProps = Omit<TaskProps, "id" | "createdAt">;
+type updateTaskProps = Omit<TaskProps, "id" | "createdAt">;
+
 export const useApi = () => {
     return {
         task: {
-            getAllTasks: async ({ limit = 2, offset = 0 }: PaginationTaskProps = {}) => {
+            getAllTasks: async ({ limit, offset }: PaginationTaskProps = {}) => {
 
                 try {
                     const { status, data } = await api.get("/v1/tasks", {
@@ -37,14 +39,29 @@ export const useApi = () => {
                 }
             },
             deleteTask: async (id: string) => {
-                console.log("Disparou delete", id);
                 try {
-                    // const { status } = await api.delete(`/v1/tasks/${id}`);
-                    const { status } = await api.delete(id);
-
+                    const { status } = await api.delete(`/v1/tasks/${id}`);
                     return { status };
                 } catch (error: any) {
                     throw new Error(`Não foi possivel localizar máquina:${error.message}`);
+                }
+            },
+
+            findOne: async (id: string) => {
+                try {
+                    const { status, data } = await api.get(`/v1/tasks/${id}`);
+                    return { status, data };
+                } catch (error: any) {
+                    throw new Error(`Não foi possivel localizar máquina:${id}-${error.message}`);
+                }
+            },
+
+            updateTask: async (id: string, data: updateTaskProps) => {
+                try {
+                    const { status, data: updateTask } = await api.put(`/v1/tasks/${id}`, data);
+                    return { status, data: updateTask };
+                } catch (error: any) {
+                    throw new Error(`Não foi possivel editar task:${id}-${error.meta}`);
                 }
             },
         },
