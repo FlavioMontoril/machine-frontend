@@ -1,30 +1,30 @@
-import { useMachineStore } from "../store/MachineStore"
 import { useApi } from "../services/useApi"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
 import { useEffect, useState } from "react";
 import { Card, CardTitle } from "./ui/card";
 import { Search, Settings } from "lucide-react";
 import { Input } from "./ui/input";
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "./ui/pagination";
+// import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "./ui/pagination";
 import { ScrollArea } from "./ui/scroll-area";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 import dayjs from "dayjs";
+import { useTaskStore } from "../store/MachineStore";
 
 export const MachineList: React.FC = () => {
 
     const api = useApi();
-    const { setAll, list, deleteTask } = useMachineStore();
+    const { setAll, list, deleteTask } = useTaskStore();
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalItems, setTotalItems] = useState(0);
+    // const [currentPage, setCurrentPage] = useState(1);
+    // const [totalItems, setTotalItems] = useState(0);
     const [searchMachine, setSearchMachine] = useState("");
 
-    let limit: number = 2;
-    const offset = (currentPage - 1) * limit;
-    const pagesCount = Math.ceil(totalItems / limit);
-    const firstMachineIndex = (currentPage - 1) * limit + 1;
-    const lastMachineIndex = Math.min(currentPage * limit, totalItems);
+    // let limit: number = 2;
+    // const offset = (currentPage - 1) * limit;
+    // const pagesCount = Math.ceil(totalItems / limit);
+    // const firstMachineIndex = (currentPage - 1) * limit + 1;
+    // const lastMachineIndex = Math.min(currentPage * limit, totalItems);
 
     useEffect(() => {
         fetchMachine()
@@ -33,12 +33,10 @@ export const MachineList: React.FC = () => {
     async function fetchMachine() {
 
         try {
-            console.log("DATA");
-            const { status, data } = await api.task.getAllTasks({ limit, offset })
+            const { status, data } = await api.task.getAllTasks()
             if (status === 200 && data)
-                console.log("fetchMachine → status:", status, "data:", data);
-            setAll(data)
-            setTotalItems(data.length);
+                setAll(data)
+            // setTotalItems(data.length);
 
         } catch (error: any) {
             console.error("Nao foi possivel buscar usuarios")
@@ -47,9 +45,8 @@ export const MachineList: React.FC = () => {
     }
 
     async function handleDeleteTask(id: string) {
-        console.log("Disparou delete");
         try {
-            const { status } = await api.task.deleteTask(`/v1/tasks/${id}`);
+            const { status } = await api.task.deleteTask(id);
             if (status === 200 || status === 204) {
                 deleteTask(id)
                 toast.success(`Máquina: ${id})} - deletada com sucesso`)
@@ -114,7 +111,7 @@ export const MachineList: React.FC = () => {
             </ScrollArea>
 
 
-            <div className="flex items-center">
+            {/* <div className="flex items-center">
                 <span className="text-gray-500 flex justify-start pl-14">Máquinas {firstMachineIndex} - {lastMachineIndex} de {totalItems}</span>
 
                 <Pagination className="flex justify-end pr-14">
@@ -152,7 +149,7 @@ export const MachineList: React.FC = () => {
                         </PaginationItem>
                     </PaginationContent>
                 </Pagination>
-            </div>
+            </div> */}
 
             {/* <Button onClick={() => mockApi.machine.reset()}>
                 Resetar Máquinas

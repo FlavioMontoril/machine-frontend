@@ -5,28 +5,28 @@ import { useNavigate } from "react-router-dom";
 
 
 import { useApi } from "../services/useApi";
-import { taskSchema, TaskSchema } from "../validations/MachineSchema";
-import { TypeProps } from "../model/MachineModel";
-import { useMachineStore } from "../store/MachineStore";
 import { toast } from "sonner";
+import { useTaskStore } from "../store/MachineStore";
+import { TaskTypeProps } from "../features/task/types/types";
+import { createTaskSchema, CreateTaskSchema } from "../features/task/validation/CreateTaskSchema";
 
 export const CreateTask: React.FC = () => {
     const navigate = useNavigate();
     const api = useApi();
-    const { add } = useMachineStore();
+    const { add } = useTaskStore();
 
-    const { register, handleSubmit, reset, formState: { errors } } = useForm<TaskSchema>({
-        resolver: zodResolver(taskSchema),
+    const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateTaskSchema>({
+        resolver: zodResolver(createTaskSchema),
         defaultValues: {
             summary: "",
             description: "",
             reporter: "",
-            type: TypeProps.TASK,
+            type: TaskTypeProps.TASK,
             assignee: "",
         },
     });
 
-    const onSubmit = async (data: TaskSchema) => {
+    const onSubmit = async (data: CreateTaskSchema) => {
         try {
             const { status, data: createdData } = await api.task.createTask(data);
             if (status === 201 && createdData) {
@@ -91,9 +91,9 @@ export const CreateTask: React.FC = () => {
                 <div>
                     <label className="block mb-1">Tipo</label>
                     <select {...register("type")} className="w-full border px-2 py-1">
-                        {Object.values(TypeProps).map((tp) => (
-                            <option key={tp} value={tp}>
-                                {tp.replace("_", " ")}
+                        {Object.values(TaskTypeProps).map((type) => (
+                            <option key={type} value={type}>
+                                {type.replace("_", " ")}
                             </option>
                         ))}
                     </select>

@@ -1,24 +1,25 @@
 import { create } from "zustand";
-import { TaskModel, TaskProps } from "../model/MachineModel";
+import { TaskResponseDTO } from "../features/task/dto/response-task-dto";
+import { TaskModel } from "../features/task/models/task.models";
 
-interface MachineStoreProps {
+interface TaskStoreProps {
     list: TaskModel[];
-    add: (data: TaskProps) => Promise<void>;
-    setAll: (data: TaskProps[] | null) => void
-    deleteTask: (id: string) => Promise<void>;
+    add: (data: TaskResponseDTO) => void;
+    setAll: (data: TaskResponseDTO[] | null) => void;
+    deleteTask: (id: string) => void;
     findOne: (id: string) => TaskModel | null;
 
 }
 
-export const useMachineStore = create<MachineStoreProps>((set, get) => {
+export const useTaskStore = create<TaskStoreProps>((set, get) => {
 
-    const handleAdd = async (data: TaskProps) => {
+    const handleAdd = (data: TaskResponseDTO) => {
         const newMachine = TaskModel.build(data);
         set((state) => ({
             list: [...state.list, newMachine],
         }));
     };
-    const handleSetAll = (tasks: TaskProps[] | null) => {
+    const handleSetAll = (tasks: TaskResponseDTO[] | null) => {
         const tasksAll = tasks ? tasks.map((task) => TaskModel.build(task)) : [];
 
         set((state) => {
