@@ -48,7 +48,7 @@ export const CreateTask: React.FC = () => {
         <div className="max-w-lg mx-auto p-4">
             <h1 className="text-2xl mb-4">Criar Nova Tarefa</h1>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                {/* SUMMARY */}
+
                 <div>
                     <label className="block mb-1">Resumo</label>
                     <input
@@ -61,7 +61,6 @@ export const CreateTask: React.FC = () => {
                     )}
                 </div>
 
-                {/* DESCRIPTION */}
                 <div>
                     <label className="block mb-1">Descrição</label>
                     <textarea
@@ -74,7 +73,6 @@ export const CreateTask: React.FC = () => {
                     )}
                 </div>
 
-                {/* REPORTER */}
                 <div>
                     <label className="block mb-1">Repórter</label>
                     <input
@@ -87,7 +85,6 @@ export const CreateTask: React.FC = () => {
                     )}
                 </div>
 
-                {/* TYPE */}
                 <div>
                     <label className="block mb-1">Tipo</label>
                     <select {...register("type")} className="w-full border px-2 py-1">
@@ -102,7 +99,6 @@ export const CreateTask: React.FC = () => {
                     )}
                 </div>
 
-                {/* ASSIGNEE */}
                 <div>
                     <label className="block mb-1">Responsável</label>
                     <input
@@ -115,7 +111,6 @@ export const CreateTask: React.FC = () => {
                     )}
                 </div>
 
-                {/* SUBMIT */}
                 <button
                     type="submit"
                     className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
